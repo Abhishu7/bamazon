@@ -16,9 +16,19 @@ var connection = mysql.createConnection({
   database: "bamazonDB"
 });
 
-// connect to the mysql server and sql database
-connection.connect(function(err) {
-  if (err) throw err;
-  // run the start function after the connection is made to prompt the user
-  start();
-});
+connection.connect(function(error){
+    if(error) throw error;
+    start()
+  });
+  
+  function start(){
+    var queryAll = 'SELECT * FROM products';
+    connection.query(queryAll, function(error, response){
+      if(error) throw error;
+  
+      console.table(response);
+
+    })
+  }
+  
+  
