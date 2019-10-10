@@ -21,8 +21,8 @@ connection.connect(function(error){
     connection.query(query, function(err, res){
       if(err) throw err;
       var displayTable = new Table ({
-        head: ["Item ID", "Product Name", "Catergory", "Price", "Quantity"],
-        colWidths: [10,25,25,10,14]
+        head: ["Item ID", "Product", "Department", "Price", "Quantity"],
+        colWidths: [10,15,15,10,14]
       });
       for(var i = 0; i < res.length; i++){
         displayTable.push(
@@ -55,7 +55,31 @@ connection.connect(function(error){
    });
   };
 
-
+  function orderItems(item, quantity){
+    connection.query('Select * FROM products WHERE ?', [{item_id: item}], function(err,res){
+      console.log(res);
+      var nowThis = res[0]
+      console.log(quantity);
+      console.log(nowThis.stock_quantity);
+      if(err){console.log(err)};
+      if(quantity <= nowThis.stock_quantity){
+        var totalValue = nowThis.price * quantity;
+        console.log("Items are in stock!");
+        console.log("Total price of " + quantity + " " + nowThis.product_name + " is " + totalValue);
+        var newQuantity = nowThis.stock_quantity - quantity;
+  
+        connection.query("UPDATE products SET ? WHERE ?" , [{stock_quantity: newQuantity}, {item_id: item}], function(err){
+          if(err){console.log(err)};
+          console.log("Purchase Succesful!")
+          displayItems();
+        });
+      } else{
+        console.log("Insufficient quantity! Sorry, come again!");
+        displayItems();
+      };
+    });
+  };
+  
  
 
   
