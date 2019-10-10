@@ -1,34 +1,64 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require("cli-table2");
 
-// create the connection information for the sql database
+
 var connection = mysql.createConnection({
   host: "localhost",
-
-  // Your port; if not 3306
   port: 3306,
-
-  // Your username
   user: "root",
-
-  // Your password
   password: "root",
   database: "bamazonDB"
 });
 
 connection.connect(function(error){
     if(error) throw error;
-    start()
+    console.log("connected as id" + connection.threadId);
   });
-  
-  function start(){
-    var queryAll = 'SELECT * FROM products';
-    connection.query(queryAll, function(error, response){
-      if(error) throw error;
-  
-      console.table(response);
-
-    })
+ 
+  var displayItems = function(){
+    var query = "Select * FROM products";
+    connection.query(query, function(err, res){
+      if(err) throw err;
+      var displayTable = new Table ({
+        head: ["Item ID", "Product Name", "Catergory", "Price", "Quantity"],
+        colWidths: [10,25,25,10,14]
+      });
+      for(var i = 0; i < res.length; i++){
+        displayTable.push(
+          [res[i].item_id,res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]
+          );
+      }
+      console.log(displayTable.toString());
+      purchaseItems();
+    });
   }
+  displayItems();
+
+  function purchaseItems(){
+    inquirer.prompt([
+    {
+      type: "input",
+      name: "item",
+      message:"Enter Item ID of item requested",
+    },
+    {
+      type:"input",
+      name:"quantity",
+      message:"Enter quantity requested",
+    },
   
+   ]).then(function(answers){
+    var itemRequested = answers.item;
+    var quantityNeeded = answers.quantity;
+    orderItems(itemRequested, quantityNeeded);
+   });
+  };
+
+
+ 
+
+  
+
+
   
